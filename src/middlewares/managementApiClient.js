@@ -6,6 +6,7 @@ module.exports = function(options) {
     tools.managementApi.getClient(options)
       .then(function(auth0) {
         request.auth0 = auth0;
+        next();
       })
       .catch(function(err) {
         next(err);
