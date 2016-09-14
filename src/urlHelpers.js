@@ -1,7 +1,7 @@
 const url = require('url');
 
 const getBasePath = function(originalUrl, path) {
-  var basePath = url.parse(originalUrl).pathname || '';
+  var basePath = url.parse(originalUrl).pathname || '';
   basePath = basePath.replace(path, '')
     .replace(/^\/|\/$/g, '');
   if (!basePath.startsWith('/')) {
