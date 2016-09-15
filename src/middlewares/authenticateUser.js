@@ -1,6 +1,6 @@
 const jwt = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
-const tools = require('auth0-extension-tools');
+const UnauthorizedError = require('auth0-extension-tools').UnauthorizedError;
 
 module.exports = function(domain, audience) {
   return jwt({
@@ -11,7 +11,7 @@ module.exports = function(domain, audience) {
       jwksUri: 'https://' + domain + '/.well-known/jwks.json',
       handleSigningKeyError: function(err, cb) {
         if (err instanceof jwksRsa.SigningKeyNotFoundError) {
-          return cb(new tools.UnauthorizedError('A token was provided with an invalid kid'));
+          return cb(new UnauthorizedError('A token was provided with an invalid kid'));
         }
 
         return cb(err);
