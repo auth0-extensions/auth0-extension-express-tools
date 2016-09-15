@@ -4,8 +4,8 @@ const tools = require('auth0-extension-tools');
 const errorHandlerMiddleware = require('../../src/middlewares').errorHandler;
 
 tape('errorHandler should return 500 by default', function(t) {
-  let statusCode = 0;
-  let err = null;
+  var statusCode = 0;
+  var err = null;
 
   errorHandlerMiddleware()(
     new Error('foo'),
@@ -28,8 +28,8 @@ tape('errorHandler should return 500 by default', function(t) {
 });
 
 tape('errorHandler should return status of the error if available', function(t) {
-  let statusCode = 0;
-  let err = null;
+  var statusCode = 0;
+  var err = null;
 
   errorHandlerMiddleware()(
     new tools.NotFoundError('foo'),
@@ -52,7 +52,7 @@ tape('errorHandler should return status of the error if available', function(t) 
 });
 
 tape('errorHandler should log the error correctly', function(t) {
-  let err = null;
+  var err = null;
 
   errorHandlerMiddleware((error) => { err = error; })(
     new tools.NotFoundError('foo'),
