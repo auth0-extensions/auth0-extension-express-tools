@@ -44,6 +44,96 @@ module.exports = (config, storage) => {
 
 ### Middlewares
 
+#### Authentication Required Middleware
+
+Force a user to be set on the request. If no user is present, an `UnauthorizedError` will be returned.
+
+```js
+const middlewares = require('auth0-extension-express-tools').middlewares;
+
+const app = new Express();
+...
+
+app.get('/users/:id', middlewares.requireAuthentication, (req, res, next) => {
+  ...
+});
+```
+
+#### User Authentication Middleware
+
+Validate an end user token using RS256.
+
+```js
+const authenticateUsers = require('auth0-extension-express-tools').authenticateUsers;
+
+const app = new Express();
+app.use(authenticateUsers({
+  domain: 'me.auth0.com',
+  audience: 'urn:myapp',
+  credentialsRequired: true, // Default
+  onLoginSuccess: (req, res, next) => {
+    req.user.foo = 'bar';
+    next();
+  }
+});)
+```
+
+You can also optionally set the middleware to only execute when a token is provided where the issuer matches the configured issuer. If not token is provided, or a token is provided with a different issuer, this middleware will not run.
+
+```js
+const authenticateUsers = require('auth0-extension-express-tools').authenticateUsers;
+
+const app = new Express();
+app.use(authenticateUsers.optional({
+  domain: 'me.auth0.com',
+  audience: 'urn:myapp',
+  onLoginSuccess: (req, res, next) => {
+    req.user.foo = 'bar';
+    next();
+  }
+});)
+```
+
+#### Auth0 Administrator Authentication Middleware
+
+Validate an administrator session token.
+
+```js
+const authenticateAdmins = require('auth0-extension-express-tools').authenticateAdmins;
+
+const app = new Express();
+app.use(authenticateAdmins({
+  onLoginSuccess: (req, res, next) => {
+    req.user.role = 'Admin';
+    next();
+  },
+  credentialsRequired: true,
+  secret: 'abc',
+  audience: 'urn:api',
+  baseUrl: 'http://my-extension'
+});
+```
+
+You can also optionally set the middleware to only execute when a token is provided where the issuer matches the configured issuer. If not token is provided, or a token is provided with a different issuer, this middleware will not run.
+
+```js
+const authenticateUsers = require('auth0-extension-express-tools').authenticateUsers;
+
+const app = new Express();
+app.use(authenticateAdmins.optional({
+  onLoginSuccess: (req, res, next) => {
+    req.user.role = 'Admin';
+    next();
+  },
+  credentialsRequired: true,
+  secret: 'abc',
+  audience: 'urn:api',
+  baseUrl: 'http://my-extension'
+});
+```
+
+#### API v2 Middleware
+
 A middleware to inject the Management API Client for Node.js on the current request:
 
 ```js
@@ -65,6 +155,8 @@ app.get('/users/:id', managementClient, (req, res, next) => {
     .catch(next);
 });
 ```
+
+#### Hook Token Middleware
 
 A middleware to validate tokens from the Management Dashboard when installing/updating/uninstalling Extensions:
 

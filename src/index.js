@@ -1,7 +1,7 @@
 const server = require('./server');
 const urlHelpers = require('./urlHelpers');
 const middlewares = require('./middlewares');
-const dashboardAdminSession = require('./dashboardAdminSession');
+const routes = require('./routes');
 
 /*
  * Bootstrap function to run initialize an Express server.
@@ -19,6 +19,6 @@ module.exports.urlHelpers = urlHelpers;
 module.exports.middlewares = middlewares;
 
 /*
- * Session logic.
+ * Route bundles.
  */
-module.exports.dashboardAdminSession = dashboardAdminSession;
+module.exports.routes = routes;

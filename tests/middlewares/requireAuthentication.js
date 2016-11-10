@@ -1,9 +1,9 @@
 const tape = require('tape');
 
-const requireUser = require('../../src/middlewares').requireUser;
+const requireAuthentication = require('../../src/middlewares').requireAuthentication;
 
 tape('requireUser should continue if user is set', function(t) {
-  requireUser(
+  requireAuthentication(
     { user: { name: 'foo' } },
     { },
     function(err) {
@@ -14,7 +14,7 @@ tape('requireUser should continue if user is set', function(t) {
 });
 
 tape('requireUser should return error if user is not set', function(t) {
-  requireUser(
+  requireAuthentication(
     { },
     { },
     function(err) {

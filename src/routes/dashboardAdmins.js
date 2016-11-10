@@ -1,16 +1,11 @@
 const express = require('express');
-const expressJwt = require('express-jwt');
 const tools = require('auth0-extension-tools');
 
-const urlHelpers = require('./urlHelpers');
+const urlHelpers = require('../urlHelpers');
 
 module.exports = function(options) {
   if (!options || typeof options !== 'object') {
     throw new tools.ArgumentError('Must provide the options');
-  }
-
-  if (options.onLoginSuccess === null || options.onLoginSuccess === undefined) {
-    throw new tools.ArgumentError('Must provide a valid login callback');
   }
 
   if (options.secret === null || options.secret === undefined) {
@@ -64,14 +59,6 @@ module.exports = function(options) {
   const sessionStorageKey = options.sessionStorageKey || 'apiToken';
   const urlPrefix = options.urlPrefix || '';
 
-  const jwt = expressJwt({
-    audience: options.audience,
-    issuer: options.baseUrl,
-    secret: options.secret,
-    algorithms: [ 'HS256' ],
-    credentialsRequired: false
-  });
-
   const router = express.Router();
   router.get(urlPrefix + '/login', function(req, res) {
     const sessionManager = new tools.SessionManager(options.rta, options.domain, options.baseUrl);
@@ -124,20 +111,5 @@ module.exports = function(options) {
     });
   });
 
-  return {
-    middleware: function(req, res, next) {
-      jwt(req, res, function(err) {
-        if (err) {
-          return next(err);
-        }
-
-        if (options.onLoginSuccess) {
-          return options.onLoginSuccess(req, res, next);
-        }
-
-        return next();
-      });
-    },
-    routes: router
-  };
+  return router;
 };
