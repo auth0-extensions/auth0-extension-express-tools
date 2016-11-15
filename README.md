@@ -15,7 +15,7 @@ Here's what you need to use it as an entrypoint for your Webtask:
 ```js
 const expressApp = require('./server');
 
-module.exports = expressTools.createServer(function(req, config, storage) {
+module.exports = expressTools.createServer(function(config, storage) {
   return expressApp(config, storage);
 });
 ```
