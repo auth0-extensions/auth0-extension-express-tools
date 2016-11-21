@@ -1,4 +1,6 @@
 const express = require('express');
+const crypto = require('crypto');
+const cookieParser = require('cookie-parser');
 const tools = require('auth0-extension-tools');
 
 const urlHelpers = require('../urlHelpers');
@@ -57,19 +59,27 @@ module.exports = function(options) {
   }
 
   const sessionStorageKey = options.sessionStorageKey || 'apiToken';
+  const statePrefix = options.statePrefix || 'state';
   const urlPrefix = options.urlPrefix || '';
 
   const router = express.Router();
   router.get(urlPrefix + '/login', function(req, res) {
+    const state = crypto.randomBytes(16).toString('hex');
     const sessionManager = new tools.SessionManager(options.rta, options.domain, options.baseUrl);
-    res.redirect(sessionManager.createAuthorizeUrl({
+    const redirectTo = sessionManager.createAuthorizeUrl({
       redirectUri: urlHelpers.getBaseUrl(req) + urlPrefix + '/login/callback',
       scopes: options.scopes,
       expiration: options.expiration
-    }));
+    }) + '&state=' + state;
+    res.cookie(statePrefix, state);
+    res.redirect(redirectTo);
   });
 
-  router.post(urlPrefix + '/login/callback', function(req, res, next) {
+  router.post(urlPrefix + '/login/callback', cookieParser(), function(req, res, next) {
+    if (req.cookies[statePrefix] !== req.body.state) {
+      return next(new tools.ValidationError('State mismatch'));
+    }
+
     const sessionManager = new tools.SessionManager(options.rta, options.domain, options.baseUrl);
     sessionManager.create(req.body.id_token, req.body.access_token, {
       secret: options.secret,
@@ -79,15 +89,16 @@ module.exports = function(options) {
       res.header('Content-Type', 'text/html');
       res.status(200).send('<html>' +
         '<head>' +
-          '<script type="text/javascript">' +
-            'sessionStorage.setItem("' + sessionStorageKey + '", "' + token + '");' +
-            'window.location.href = "' + urlHelpers.getBaseUrl(req) + '";' +
-          '</script>' +
-      '</html>');
+        '<script type="text/javascript">' +
+        'sessionStorage.setItem("' + sessionStorageKey + '", "' + token + '");' +
+        'window.location.href = "' + urlHelpers.getBaseUrl(req) + '";' +
+        '</script>' +
+        '</head>' +
+        '</html>');
     })
-    .catch(function(err) {
-      next(err);
-    });
+      .catch(function(err) {
+        next(err);
+      });
   });
 
   router.get(urlPrefix + '/logout', function(req, res) {
@@ -95,11 +106,12 @@ module.exports = function(options) {
     res.header('Content-Type', 'text/html');
     res.status(200).send('<html>' +
       '<head>' +
-        '<script type="text/javascript">' +
-          'sessionStorage.removeItem("' + sessionStorageKey + '");' +
-          'window.location.href = "https://"' + options.rta + '"/v2/logout/?returnTo=' + encodedBaseUrl + '&client_id=' + encodedBaseUrl + '";' +
-        '</script>' +
-    '</html>');
+      '<script type="text/javascript">' +
+      'sessionStorage.removeItem("' + sessionStorageKey + '");' +
+      'window.location.href = "https://' + options.rta + '/v2/logout/?returnTo=' + encodedBaseUrl + '&client_id=' + encodedBaseUrl + '";' +
+      '</script>' +
+      '</head>' +
+      '</html>');
   });
 
   router.get('/.well-known/oauth2-client-configuration', function(req, res) {
