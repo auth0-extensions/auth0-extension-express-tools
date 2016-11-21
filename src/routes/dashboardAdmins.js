@@ -58,44 +58,48 @@ module.exports = function(options) {
     throw new tools.ArgumentError('The provided client name is invalid: ' + options.clientName);
   }
 
-  const sessionStorageKey = options.sessionStorageKey || 'apiToken';
-  const statePrefix = options.statePrefix || 'state';
+  const stateKey = options.stateKey || 'state';
   const urlPrefix = options.urlPrefix || '';
+  const sessionStorageKey = options.sessionStorageKey || 'apiToken';
 
   const router = express.Router();
   router.get(urlPrefix + '/login', function(req, res) {
     const state = crypto.randomBytes(16).toString('hex');
+    res.cookie(stateKey, state);
+
     const sessionManager = new tools.SessionManager(options.rta, options.domain, options.baseUrl);
     const redirectTo = sessionManager.createAuthorizeUrl({
       redirectUri: urlHelpers.getBaseUrl(req) + urlPrefix + '/login/callback',
       scopes: options.scopes,
       expiration: options.expiration
-    }) + '&state=' + state;
-    res.cookie(statePrefix, state);
-    res.redirect(redirectTo);
+    });
+    res.redirect(redirectTo + '&state=' + state);
   });
 
   router.post(urlPrefix + '/login/callback', cookieParser(), function(req, res, next) {
-    if (req.cookies[statePrefix] !== req.body.state) {
-      return next(new tools.ValidationError('State mismatch'));
+    if (!req.cookies || req.cookies[stateKey] !== req.body.state) {
+      return next(new tools.ValidationError('Login failed. State mismatch.'));
     }
 
     const sessionManager = new tools.SessionManager(options.rta, options.domain, options.baseUrl);
-    sessionManager.create(req.body.id_token, req.body.access_token, {
+    const session = sessionManager.create(req.body.id_token, req.body.access_token, {
       secret: options.secret,
       issuer: options.baseUrl,
       audience: options.audience
-    }).then(function(token) {
-      res.header('Content-Type', 'text/html');
-      res.status(200).send('<html>' +
-        '<head>' +
-        '<script type="text/javascript">' +
-        'sessionStorage.setItem("' + sessionStorageKey + '", "' + token + '");' +
-        'window.location.href = "' + urlHelpers.getBaseUrl(req) + '";' +
-        '</script>' +
-        '</head>' +
-        '</html>');
-    })
+    });
+
+    return session
+      .then(function(token) {
+        res.header('Content-Type', 'text/html');
+        res.status(200).send('<html>' +
+          '<head>' +
+          '<script type="text/javascript">' +
+          'sessionStorage.setItem("' + sessionStorageKey + '", "' + token + '");' +
+          'window.location.href = "' + urlHelpers.getBaseUrl(req) + '";' +
+          '</script>' +
+          '</head>' +
+          '</html>');
+      })
       .catch(function(err) {
         next(err);
       });
@@ -104,14 +108,16 @@ module.exports = function(options) {
   router.get(urlPrefix + '/logout', function(req, res) {
     const encodedBaseUrl = encodeURIComponent(urlHelpers.getBaseUrl(req));
     res.header('Content-Type', 'text/html');
-    res.status(200).send('<html>' +
+    res.status(200).send(
+      '<html>' +
       '<head>' +
       '<script type="text/javascript">' +
       'sessionStorage.removeItem("' + sessionStorageKey + '");' +
       'window.location.href = "https://' + options.rta + '/v2/logout/?returnTo=' + encodedBaseUrl + '&client_id=' + encodedBaseUrl + '";' +
       '</script>' +
       '</head>' +
-      '</html>');
+      '</html>'
+    );
   });
 
   router.get('/.well-known/oauth2-client-configuration', function(req, res) {
