@@ -3,7 +3,7 @@ const Webtask = require('webtask-tools');
 
 module.exports.createServer = function(cb) {
   const serverFn = tools.createServer(cb);
-  let dispatchFn = null;
+  var dispatchFn = null;
 
   return Webtask.fromExpress(function requestHandler(req, res) {
     if (!dispatchFn) {
