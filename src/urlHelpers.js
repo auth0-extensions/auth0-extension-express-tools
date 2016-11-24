@@ -17,10 +17,10 @@ module.exports.getBasePath = function(req) {
   return getBasePath(req.originalUrl || '', req.path);
 };
 
-module.exports.getBaseUrl = function(req) {
+module.exports.getBaseUrl = function(req, protocol) {
   const originalUrl = url.parse(req.originalUrl || '').pathname || '';
   return url.format({
-    protocol: process.env.NODE_ENV !== 'production' ? 'http' : 'https',
+    protocol: protocol || 'https',
     host: req.get('host'),
     pathname: originalUrl.replace(req.path, '')
   });
