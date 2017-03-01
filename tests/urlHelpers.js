@@ -5,7 +5,10 @@ const urlHelpers = require('../src/urlHelpers');
 tape('urlHelpers#getBasePath should return the base path of the request', function(t) {
   const req = {
     originalUrl: 'https://sandbox.it.auth0.com/api/run/mytenant/abc',
-    path: '/users'
+    path: '/users',
+    headers: {
+      host: 'sandbox.it.auth0.com'
+    }
   };
 
   t.equal(urlHelpers.getBasePath(req), '/api/run/mytenant/abc/');
@@ -14,7 +17,10 @@ tape('urlHelpers#getBasePath should return the base path of the request', functi
 
 tape('urlHelpers#getBasePath should return slash if not running in webtask', function(t) {
   const req = {
-    path: '/users'
+    path: '/users',
+    headers: {
+      host: 'sandbox.it.auth0.com'
+    }
   };
 
   t.equal(urlHelpers.getBasePath(req), '/');
@@ -25,6 +31,9 @@ tape('urlHelpers#getBaseUrl should return the base path of the request', functio
   const req = {
     originalUrl: 'https://sandbox.it.auth0.com/api/run/mytenant/abc',
     path: '/users',
+    headers: {
+      host: 'sandbox.it.auth0.com'
+    },
     get: function() {
       return 'sandbox.it.auth0.com';
     }
@@ -37,6 +46,9 @@ tape('urlHelpers#getBaseUrl should return the base path of the request', functio
 tape('urlHelpers#getBaseUrl should return slash if not running in webtask', function(t) {
   const req = {
     path: '/users',
+    headers: {
+      host: 'sandbox.it.auth0.com'
+    },
     get: function() {
       return 'sandbox.it.auth0.com';
     }
@@ -50,6 +62,9 @@ tape('urlHelpers#getBaseUrl should use https by default', function(t) {
   const req = {
     originalUrl: 'http://sandbox.it.auth0.com/api/run/mytenant/abc',
     path: '/users',
+    headers: {
+      host: 'sandbox.it.auth0.com'
+    },
     get: function() {
       return 'sandbox.it.auth0.com';
     }
@@ -63,6 +78,9 @@ tape('urlHelpers#getBaseUrl should allow overwriting the protocol', function(t) 
   const req = {
     originalUrl: 'https://sandbox.it.auth0.com/api/run/mytenant/abc',
     path: '/users',
+    headers: {
+      host: 'sandbox.it.auth0.com'
+    },
     get: function() {
       return 'sandbox.it.auth0.com';
     }
