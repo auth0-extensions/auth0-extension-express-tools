@@ -20,7 +20,7 @@ module.exports = function(options) {
   }
 
   if (options.audience === null || options.audience === undefined) {
-    throw new tools.ArgumentError('Must provide a valid secret');
+    throw new tools.ArgumentError('Must provide a valid audience');
   }
 
   if (typeof options.audience !== 'string' || options.audience.length === 0) {
@@ -82,7 +82,13 @@ module.exports = function(options) {
   });
 
   router.post(urlPrefix + '/login/callback', cookieParser(), function(req, res, next) {
-    const decoded = (req.body && req.body.id_token) ? jwt.decode(req.body.id_token) : null;
+    var decoded;
+
+    try {
+      decoded = jwt.decode(req.body.id_token);
+    } catch (e) {
+      decoded = null;
+    }
 
     if (!decoded || !req.cookies || req.cookies[nonceKey] !== decoded.nonce) {
       return next(new tools.ValidationError('Login failed. Nonce mismatch.'));
