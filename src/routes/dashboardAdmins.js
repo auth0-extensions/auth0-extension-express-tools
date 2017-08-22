@@ -77,9 +77,7 @@ module.exports = function(options) {
   });
 
   router.post(urlPrefix + '/login/callback', cookieParser(), function(req, res, next) {
-    if (options.rta === 'auth0.auth0.com' && (!req.cookies || req.cookies[stateKey] !== req.body.state)) {
-      return next(new tools.ValidationError('Login failed. State mismatch.'));
-    } else if (req.cookies[stateKey] && req.cookies[stateKey] !== req.body.state) {
+    if (!req.cookies || req.cookies[stateKey] !== req.body.state) {
       return next(new tools.ValidationError('Login failed. State mismatch.'));
     }
 

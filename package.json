@@ -1,6 +1,6 @@
 {
   "name": "auth0-extension-express-tools",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A set of tools and utilities to simplify the development of Auth0 Extensions with Express.",
   "main": "src/index.js",
   "dependencies": {
