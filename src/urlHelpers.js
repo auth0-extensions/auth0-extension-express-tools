@@ -62,15 +62,18 @@ module.exports.getWebtaskUrl = function(req) {
   const requestOriginalUrl = req.url;
   const requestUrl = req.url.replace(normalizeRouteRx, '/');
   const requestPath = url.parse(requestUrl || '').pathname;
-
+  const isIsolatedDomain = req.x_wt && req.x_wt.ectx && req.x_wt.ectx.ISOLATED_DOMAIN || false;
   const originalUrl = url.parse(requestOriginalUrl || '').pathname || '';
-  var webtaskUrl = url.format({
-    protocol: 'https',
-    host: req.headers.host,
-    pathname: originalUrl.replace(requestPath, '').replace(/\/$/g, '')
-  });
 
-  if (req.x_wt) {
+  if (!isIsolatedDomain) {
+    wetaskUrl = originalUrl;
+  } else {
+    var webtaskUrl = url.format({
+      protocol: 'https',
+      host: req.headers.host,
+      pathname: originalUrl.replace(requestPath, '').replace(/\/$/g, '')
+    });
+
     if (webtaskUrl.indexOf('https://sandbox.it.auth0.com') === 0) {
       webtaskUrl = webtaskUrl.replace('https://sandbox.it.auth0.com/api/run/' + req.x_wt.container + '/', 'https://' + req.x_wt.container + '.us.webtask.io/');
     } else if (webtaskUrl.indexOf('https://sandbox-eu.it.auth0.com') === 0) {
@@ -79,6 +82,7 @@ module.exports.getWebtaskUrl = function(req) {
       webtaskUrl = webtaskUrl.replace('https://sandbox-au.it.auth0.com/api/run/' + req.x_wt.container + '/', 'https://' + req.x_wt.container + '.au.webtask.io/');
     }
   }
+
 
   return webtaskUrl;
 };
