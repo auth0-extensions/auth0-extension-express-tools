@@ -3,7 +3,7 @@ const url = require('url');
 const USE_WILDCARD_DOMAIN = 3;
 const USE_CUSTOM_DOMAIN = 2;
 const USE_SHARED_DOMAIN = 1;
-const SANITIZE_RX = /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g;
+const SANITIZE_RX = /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g; // eslint-disable-line no-useless-escape
 
 const getBasePath = function(originalUrl, path) {
   var basePath = url.parse(originalUrl).pathname || '';
