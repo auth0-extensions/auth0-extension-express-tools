@@ -62,13 +62,14 @@ module.exports.getWebtaskUrl = function(req) {
   const requestOriginalUrl = req.url;
   const requestUrl = req.url.replace(normalizeRouteRx, '/');
   const requestPath = url.parse(requestUrl || '').pathname;
-  const isIsolatedDomain = req.x_wt && req.x_wt.ectx && req.x_wt.ectx.ISOLATED_DOMAIN || false;
+  const isIsolatedDomain = (req.x_wt && req.x_wt.ectx && req.x_wt.ectx.ISOLATED_DOMAIN) || false;
   const originalUrl = url.parse(requestOriginalUrl || '').pathname || '';
 
+  var webtaskUrl;
   if (!isIsolatedDomain) {
-    wetaskUrl = originalUrl;
+    webtaskUrl = originalUrl;
   } else {
-    var webtaskUrl = url.format({
+    webtaskUrl = url.format({
       protocol: 'https',
       host: req.headers.host,
       pathname: originalUrl.replace(requestPath, '').replace(/\/$/g, '')
