@@ -1,6 +1,7 @@
 const express = require('express');
 const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
+const jwt = require('jsonwebtoken');
 const tools = require('auth0-extension-tools');
 
 const urlHelpers = require('../urlHelpers');
@@ -19,7 +20,7 @@ module.exports = function(options) {
   }
 
   if (options.audience === null || options.audience === undefined) {
-    throw new tools.ArgumentError('Must provide a valid secret');
+    throw new tools.ArgumentError('Must provide a valid audience');
   }
 
   if (typeof options.audience !== 'string' || options.audience.length === 0) {
@@ -59,24 +60,40 @@ module.exports = function(options) {
   }
 
   const stateKey = options.stateKey || 'state';
+  const nonceKey = options.nonceKey || 'nonce';
   const urlPrefix = options.urlPrefix || '';
   const sessionStorageKey = options.sessionStorageKey || 'apiToken';
 
   const router = express.Router();
   router.get(urlPrefix + '/login', function(req, res) {
     const state = crypto.randomBytes(16).toString('hex');
+    const nonce = crypto.randomBytes(16).toString('hex');
     res.cookie(stateKey, state);
+    res.cookie(nonceKey, nonce);
 
     const sessionManager = new tools.SessionManager(options.rta, options.domain, options.baseUrl);
     const redirectTo = sessionManager.createAuthorizeUrl({
       redirectUri: urlHelpers.getBaseUrl(req) + urlPrefix + '/login/callback',
       scopes: options.scopes,
-      expiration: options.expiration
+      expiration: options.expiration,
+      nonce: nonce
     });
     res.redirect(redirectTo + '&state=' + state);
   });
 
   router.post(urlPrefix + '/login/callback', cookieParser(), function(req, res, next) {
+    var decoded;
+
+    try {
+      decoded = jwt.decode(req.body.id_token);
+    } catch (e) {
+      decoded = null;
+    }
+
+    if (!decoded || !req.cookies || req.cookies[nonceKey] !== decoded.nonce) {
+      return next(new tools.ValidationError('Login failed. Nonce mismatch.'));
+    }
+
     if (!req.cookies || req.cookies[stateKey] !== req.body.state) {
       return next(new tools.ValidationError('Login failed. State mismatch.'));
     }
