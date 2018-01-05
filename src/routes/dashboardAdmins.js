@@ -76,9 +76,10 @@ module.exports = function(options) {
       redirectUri: urlHelpers.getBaseUrl(req) + urlPrefix + '/login/callback',
       scopes: options.scopes,
       expiration: options.expiration,
-      nonce: nonce
+      nonce: nonce,
+      state: state
     });
-    res.redirect(redirectTo + '&state=' + state);
+    res.redirect(redirectTo);
   });
 
   router.post(urlPrefix + '/login/callback', cookieParser(), function(req, res, next) {
