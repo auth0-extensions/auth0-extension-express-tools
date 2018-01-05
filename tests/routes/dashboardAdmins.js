@@ -162,7 +162,8 @@ tape('dashboardAdmins should redirect to auth0 on /login', function(t) {
       cookies[key] = value;
     },
     redirect: function(url) {
-      const expectedUrl = 'https://auth0.auth0.com/i/oauth2/authorize?client_id=http%3A%2F%2Fapi&response_type=token&response_mode=form_post&scope=openid%20name%20email&expiration=36000&redirect_uri=https%3A%2Flogin%2Flogin%2Fcallback&audience=https%3A%2F%2Ftest.auth0.com%2Fapi%2Fv2%2F&state=' + cookies.state;
+      const expectedUrl = 'https://auth0.auth0.com/authorize?client_id=http%3A%2F%2Fapi&response_type=token' +
+        ' id_token&response_mode=form_post&scope=openid%20name%20email&expiration=36000&redirect_uri=https%3A%2Flogin%2Flogin%2Fcallback&audience=https%3A%2F%2Ftest.auth0.com%2Fapi%2Fv2%2F&nonce=' + cookies.nonce + '&state=' + cookies.state;
       t.ok(url);
       t.equal(url, expectedUrl);
       t.end();
