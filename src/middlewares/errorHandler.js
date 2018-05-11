@@ -1,5 +1,5 @@
 module.exports = function(errorLogger) {
-  return function(err, req, res, next) {
+  return function(err, req, res, next) { // eslint-disable-line no-unused-vars
     if (errorLogger) {
       errorLogger(err);
     }
