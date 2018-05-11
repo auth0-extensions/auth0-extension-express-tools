@@ -1,5 +1,5 @@
 module.exports = function(errorLogger) {
-  return function(err, req, res) {
+  return function(err, req, res, next) {
     if (errorLogger) {
       errorLogger(err);
     }
