@@ -59,9 +59,14 @@ module.exports = function(options) {
     throw new tools.ArgumentError('The provided client name is invalid: ' + options.clientName);
   }
 
+  if (typeof options.storageType !== 'undefined' && options.storageType !== 'sessionStorage' && options.storageType !== 'localStorage') {
+    throw new tools.ArgumentError('The storageType must be either "sessionStorage" or "localStorage". Incorrect storageType: ' + options.storageType);
+  }
+
   const stateKey = options.stateKey || 'state';
   const nonceKey = options.nonceKey || 'nonce';
   const urlPrefix = options.urlPrefix || '';
+  const storageType = options.storageType || 'sessionStorage';
   const sessionStorageKey = options.sessionStorageKey || 'apiToken';
 
   const router = express.Router();
@@ -112,7 +117,7 @@ module.exports = function(options) {
         res.status(200).send('<html>' +
           '<head>' +
           '<script type="text/javascript">' +
-          'sessionStorage.setItem("' + sessionStorageKey + '", "' + token + '");' +
+          storageType + '.setItem("' + sessionStorageKey + '", "' + token + '");' +
           'window.location.href = "' + urlHelpers.getBaseUrl(req) + '";' +
           '</script>' +
           '</head>' +
@@ -130,7 +135,7 @@ module.exports = function(options) {
       '<html>' +
       '<head>' +
       '<script type="text/javascript">' +
-      'sessionStorage.removeItem("' + sessionStorageKey + '");' +
+      storageType + '.removeItem("' + sessionStorageKey + '");' +
       'window.location.href = "https://' + options.rta + '/v2/logout/?returnTo=' + encodedBaseUrl + '&client_id=' + encodedBaseUrl + '";' +
       '</script>' +
       '</head>' +
