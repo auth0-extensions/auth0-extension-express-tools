@@ -67,7 +67,7 @@ module.exports = function(options) {
   const nonceKey = options.nonceKey || 'nonce';
   const urlPrefix = options.urlPrefix || '';
   const storageType = options.storageType || 'sessionStorage';
-  const sessionStorageKey = options.sessionStorageKey || 'apiToken';
+  const storageKey = options.storageKey || options.sessionStorageKey || 'apiToken';
 
   const router = express.Router();
   router.get(urlPrefix + '/login', function(req, res) {
@@ -117,7 +117,7 @@ module.exports = function(options) {
         res.status(200).send('<html>' +
           '<head>' +
           '<script type="text/javascript">' +
-          storageType + '.setItem("' + sessionStorageKey + '", "' + token + '");' +
+          storageType + '.setItem("' + storageKey + '", "' + token + '");' +
           'window.location.href = "' + urlHelpers.getBaseUrl(req) + '";' +
           '</script>' +
           '</head>' +
@@ -135,7 +135,7 @@ module.exports = function(options) {
       '<html>' +
       '<head>' +
       '<script type="text/javascript">' +
-      storageType + '.removeItem("' + sessionStorageKey + '");' +
+      storageType + '.removeItem("' + storageKey + '");' +
       'window.location.href = "https://' + options.rta + '/v2/logout/?returnTo=' + encodedBaseUrl + '&client_id=' + encodedBaseUrl + '";' +
       '</script>' +
       '</head>' +
