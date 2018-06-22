@@ -43,8 +43,8 @@ function createRouteNormalizationRx(claims) {
 
   const container = claims.container.replace(SANITIZE_RX, '\\$&');
   const name = claims.jtn
-      ? claims.jtn.replace(SANITIZE_RX, '\\$&')
-      : '';
+    ? claims.jtn.replace(SANITIZE_RX, '\\$&')
+    : '';
 
   if (claims.url_format === USE_SHARED_DOMAIN) {
     return new RegExp('^/api/run/' + container + '/(?:' + name + '/?)?');
@@ -65,23 +65,25 @@ function getWTRegionalUrl(wtUrl, container) {
   const nodeVersion = (wtUrl.indexOf('sandbox8') >= 0) ? '8' : '';
   const firstPart = wtUrl.split('.it.auth0.com')[0];
   const region = firstPart.split('-')[1] || 'us';
+  const wtName = wtUrl.split('/' + container + '/')[1];
 
-  return 'https://' + container + '.' + region + nodeVersion + '.webtask.io/';
+  return 'https://' + container + '.' + region + nodeVersion + '.webtask.io/' + wtName;
 }
 
 module.exports.getWebtaskUrl = function(req) {
+  const secrets = (req.x_wt && req.x_wt.ectx) || {};
   const normalizeRouteRx = createRouteNormalizationRx(req.x_wt);
   const requestOriginalUrl = req.url;
   const requestUrl = req.url.replace(normalizeRouteRx, '/');
   const requestPath = url.parse(requestUrl || '').pathname;
-  const isIsolatedDomain = (req.x_wt && req.x_wt.ectx && req.x_wt.ectx.ISOLATED_DOMAIN) || false;
+  const isIsolatedDomain = secrets.ISOLATED_DOMAIN || false;
   const originalUrl = url.parse(requestOriginalUrl || '').pathname || '';
 
   var webtaskUrl;
   if (!isIsolatedDomain) {
     webtaskUrl = originalUrl;
   } else {
-    webtaskUrl = url.format({
+    webtaskUrl = secrets.WT_URL || url.format({
       protocol: 'https',
       host: req.headers.host,
       pathname: originalUrl.replace(requestPath, '').replace(/\/$/g, '')
@@ -91,7 +93,7 @@ module.exports.getWebtaskUrl = function(req) {
     const regionalUrl = getWTRegionalUrl(webtaskUrl, req.x_wt.container);
 
     if (webtaskUrl.indexOf(trigger) >= 0) {
-      webtaskUrl = webtaskUrl.replace('https://' + req.headers.host + '/api/run/' + req.x_wt.container + '/', regionalUrl);
+      webtaskUrl = regionalUrl;
     }
   }
 
