@@ -75,7 +75,6 @@ module.exports = function(options) {
     const redirectTo = sessionManager.createAuthorizeUrl({
       redirectUri: urlHelpers.getBaseUrl(req) + urlPrefix + '/login/callback',
       scopes: options.scopes,
-      responseType: options.responseType,
       expiration: options.expiration,
       nonce: nonce,
       state: state
@@ -104,7 +103,8 @@ module.exports = function(options) {
     const session = sessionManager.create(req.body.id_token, req.body.access_token, {
       secret: options.secret,
       issuer: options.baseUrl,
-      audience: options.audience
+      audience: options.audience,
+      noAccessToken: options.noAccessToken
     });
 
     return session
