@@ -103,7 +103,8 @@ module.exports = function(options) {
     const session = sessionManager.create(req.body.id_token, req.body.access_token, {
       secret: options.secret,
       issuer: options.baseUrl,
-      audience: options.audience
+      audience: options.audience,
+      noAccessToken: options.noAccessToken
     });
 
     return session
