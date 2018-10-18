@@ -68,8 +68,8 @@ module.exports = function(options) {
   router.get(urlPrefix + '/login', function(req, res) {
     const state = crypto.randomBytes(16).toString('hex');
     const nonce = crypto.randomBytes(16).toString('hex');
-    res.cookie(stateKey, state);
-    res.cookie(nonceKey, nonce);
+    res.cookie(stateKey, state, { path: urlHelpers.getBasePath(req) });
+    res.cookie(nonceKey, nonce, { path: urlHelpers.getBasePath(req) });
 
     const sessionManager = new tools.SessionManager(options.rta, options.domain, options.baseUrl);
     const redirectTo = sessionManager.createAuthorizeUrl({
@@ -91,7 +91,11 @@ module.exports = function(options) {
       decoded = null;
     }
 
-    if (!decoded || !req.cookies || req.cookies[nonceKey] !== decoded.nonce) {
+    if (!decoded) {
+      return next(new tools.ValidationError('Login failed. Invalid token.'));
+    }
+
+    if (!req.cookies || req.cookies[nonceKey] !== decoded.nonce) {
       return next(new tools.ValidationError('Login failed. Nonce mismatch.'));
     }
 
@@ -109,6 +113,8 @@ module.exports = function(options) {
 
     return session
       .then(function(token) {
+        res.clearCookie(stateKey, { path: urlHelpers.getBasePath(req) });
+        res.clearCookie(nonceKey, { path: urlHelpers.getBasePath(req) });
         res.header('Content-Type', 'text/html');
         res.status(200).send('<html>' +
           '<head>' +
@@ -126,6 +132,8 @@ module.exports = function(options) {
 
   router.get(urlPrefix + '/logout', function(req, res) {
     const encodedBaseUrl = encodeURIComponent(urlHelpers.getBaseUrl(req));
+    res.clearCookie(stateKey, { path: urlHelpers.getBasePath(req) });
+    res.clearCookie(nonceKey, { path: urlHelpers.getBasePath(req) });
     res.header('Content-Type', 'text/html');
     res.status(200).send(
       '<html>' +
