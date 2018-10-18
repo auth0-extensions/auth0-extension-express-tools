@@ -66,10 +66,11 @@ module.exports = function(options) {
 
   const router = express.Router();
   router.get(urlPrefix + '/login', function(req, res) {
+    const basePath = urlHelpers.getBasePath(req);
     const state = crypto.randomBytes(16).toString('hex');
     const nonce = crypto.randomBytes(16).toString('hex');
-    res.cookie(stateKey, state, { path: urlHelpers.getBasePath(req) });
-    res.cookie(nonceKey, nonce, { path: urlHelpers.getBasePath(req) });
+    res.cookie(stateKey, state, { path: basePath });
+    res.cookie(nonceKey, nonce, { path: basePath });
 
     const sessionManager = new tools.SessionManager(options.rta, options.domain, options.baseUrl);
     const redirectTo = sessionManager.createAuthorizeUrl({
@@ -103,6 +104,7 @@ module.exports = function(options) {
       return next(new tools.ValidationError('Login failed. State mismatch.'));
     }
 
+    const basePath = urlHelpers.getBasePath(req);
     const sessionManager = new tools.SessionManager(options.rta, options.domain, options.baseUrl);
     const session = sessionManager.create(req.body.id_token, req.body.access_token, {
       secret: options.secret,
@@ -113,8 +115,8 @@ module.exports = function(options) {
 
     return session
       .then(function(token) {
-        res.clearCookie(stateKey, { path: urlHelpers.getBasePath(req) });
-        res.clearCookie(nonceKey, { path: urlHelpers.getBasePath(req) });
+        res.clearCookie(stateKey, { path: basePath });
+        res.clearCookie(nonceKey, { path: basePath });
         res.header('Content-Type', 'text/html');
         res.status(200).send('<html>' +
           '<head>' +
@@ -131,9 +133,10 @@ module.exports = function(options) {
   });
 
   router.get(urlPrefix + '/logout', function(req, res) {
+    const basePath = urlHelpers.getBasePath(req);
     const encodedBaseUrl = encodeURIComponent(urlHelpers.getBaseUrl(req));
-    res.clearCookie(stateKey, { path: urlHelpers.getBasePath(req) });
-    res.clearCookie(nonceKey, { path: urlHelpers.getBasePath(req) });
+    res.clearCookie(stateKey, { path: basePath });
+    res.clearCookie(nonceKey, { path: basePath });
     res.header('Content-Type', 'text/html');
     res.status(200).send(
       '<html>' +
