@@ -158,8 +158,9 @@ tape('dashboardAdmins should redirect to auth0 on /login', function(t) {
     };
 
   const res = {
-    cookie: function(key, value) {
+    cookie: function(key, value, options) {
       cookies[key] = value;
+      t.equal(options.path, '/login/');
     },
     redirect: function(url) {
       const expectedUrl = 'https://auth0.auth0.com/authorize?client_id=http%3A%2F%2Fapi&response_type=token' +
@@ -299,6 +300,10 @@ tape('dashboardAdmins should return 200 if everything is ok', function(t) {
 
   const res = {
     header: function() { },
+    clearCookie: function(name) {
+      if (name === 'nonce') t.equal(name, 'nonce');
+      else t.equal(name, 'state');
+    },
     status: function(status) {
       return {
         send: function(html) {
