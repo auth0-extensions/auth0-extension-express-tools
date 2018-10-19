@@ -138,6 +138,24 @@ tape('dashboardAdmins should throw error if options.clientName is empty', functi
   }
 });
 
+tape('dashboardAdmins should throw error if options.storageType is incorrect', function(t) {
+  try {
+    dashboardAdmins({
+      secret: 'abc',
+      audience: 'urn:api',
+      rta: 'auth0.auth0.com',
+      domain: 'test.auth0.com',
+      baseUrl: 'http://api',
+      storageType: 'storageType',
+      clientName: 'Some Client'
+    });
+  } catch (e) {
+    t.ok(e);
+    t.equal(e.name, 'ArgumentError');
+    t.end();
+  }
+});
+
 tape('dashboardAdmins should redirect to auth0 on /login', function(t) {
   const mw = dashboardAdmins({
     secret: 'abc',
@@ -318,3 +336,56 @@ tape('dashboardAdmins should return 200 if everything is ok', function(t) {
   mw(req, res);
 });
 
+tape('dashboardAdmins should work with localStorage', function(t) {
+  const mw = dashboardAdmins({
+    secret: 'abc',
+    audience: 'urn:api',
+    rta: 'test.auth0.com',
+    domain: 'test.auth0.com',
+    baseUrl: 'https://test.auth0.com/api/v2/',
+    storageType: 'localStorage',
+    clientName: 'Some Client'
+  });
+
+  tokens.wellKnownEndpoint('test.auth0.com', certs.bar.cert, 'key2');
+  const token = tokens.sign(certs.bar.private, 'key2', {
+    iss: 'https://test.auth0.com/',
+    sub: '1234567890',
+    aud: 'https://test.auth0.com/api/v2/',
+    azp: 'https://test.auth0.com/api/v2/',
+    name: 'John Doe',
+    admin: true,
+    nonce: 'nonce'
+  });
+
+  const req =
+    {
+      headers: {},
+      cookies: {
+        state: 'state',
+        nonce: 'nonce'
+      },
+      body: {
+        state: 'state',
+        id_token: token,
+        access_token: token
+      },
+      url: 'http://api/login/callback',
+      method: 'post'
+    };
+
+  const res = {
+    header: function() { },
+    status: function(status) {
+      return {
+        send: function(html) {
+          t.ok(html && html.indexOf('localStorage') > 0);
+          t.equal(status, 200);
+          t.end();
+        }
+      };
+    }
+  };
+
+  mw(req, res);
+});
