@@ -68,6 +68,7 @@ module.exports = function(options) {
   const urlPrefix = options.urlPrefix || '';
   const storageType = options.storageType || 'sessionStorage';
   const storageKey = options.storageKey || options.sessionStorageKey || 'apiToken';
+  const sessionManager = new tools.SessionManager(options.rta, options.domain, options.baseUrl);
 
   const router = express.Router();
   router.get(urlPrefix + '/login', function(req, res) {
@@ -77,7 +78,6 @@ module.exports = function(options) {
     res.cookie(stateKey, state, { path: basePath });
     res.cookie(nonceKey, nonce, { path: basePath });
 
-    const sessionManager = new tools.SessionManager(options.rta, options.domain, options.baseUrl);
     const redirectTo = sessionManager.createAuthorizeUrl({
       redirectUri: urlHelpers.getBaseUrl(req) + urlPrefix + '/login/callback',
       scopes: options.scopes,
@@ -110,7 +110,6 @@ module.exports = function(options) {
     }
 
     const basePath = urlHelpers.getBasePath(req);
-    const sessionManager = new tools.SessionManager(options.rta, options.domain, options.baseUrl);
     const session = sessionManager.create(req.body.id_token, req.body.access_token, {
       secret: options.secret,
       issuer: options.baseUrl,
