@@ -74,9 +74,14 @@ module.exports = function(options) {
   router.get(urlPrefix + '/login', function(req, res) {
     const basePath = urlHelpers.getBasePath(req);
     const state = crypto.randomBytes(16).toString('hex');
-    const nonce = crypto.randomBytes(16).toString('hex');
-    res.cookie(stateKey, state, { path: basePath });
-    res.cookie(nonceKey, nonce, { path: basePath });
+    const nonce = crypto.randomBytes(16).toString('hex');  
+    const basicAttr = {
+      httpOnly: true,
+      path: basePath
+    };
+
+    res.cookie(stateKey, state, Object.assign(basicAttr, { sameSite: 'None', secure: true }));
+    res.cookie(nonceKey, nonce, Object.assign(basicAttr, { sameSite: 'None', secure: true }));
 
     const redirectTo = sessionManager.createAuthorizeUrl({
       redirectUri: urlHelpers.getBaseUrl(req) + urlPrefix + '/login/callback',
@@ -101,11 +106,10 @@ module.exports = function(options) {
       return next(new tools.ValidationError('Login failed. Invalid token.'));
     }
 
-    if (!req.cookies || req.cookies[nonceKey] !== decoded.nonce) {
+    if (!req.cookies || (!req.cookies[nonceKey] && !req.cookies[nonceKey + '_compat']) || (req.cookies[nonceKey] !== decoded.nonce && req.cookies[nonceKey + "_compat"] !== decoded.nonce)) {
       return next(new tools.ValidationError('Login failed. Nonce mismatch.'));
-    }
-
-    if (!req.cookies || req.cookies[stateKey] !== req.body.state) {
+    } 
+    if (!req.cookies || (!req.cookies[stateKey] && !req.cookies[stateKey + "_compat"]) || (req.cookies[stateKey] !== req.body.state && req.cookies[stateKey + "_compat"] !== req.body.state)) {
       return next(new tools.ValidationError('Login failed. State mismatch.'));
     }
 
