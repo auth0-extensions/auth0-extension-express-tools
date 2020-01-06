@@ -129,6 +129,8 @@ module.exports = function(options) {
       .then(function(token) {
         res.clearCookie(stateKey, { path: basePath });
         res.clearCookie(nonceKey, { path: basePath });
+        res.clearCookie(stateKey + '_compat', { path: basePath });
+        res.clearCookie(nonceKey + '_compat', { path: basePath });
         res.header('Content-Type', 'text/html');
         res.status(200).send('<html>' +
           '<head>' +
