@@ -83,6 +83,10 @@ module.exports = function(options) {
     res.cookie(stateKey, state, Object.assign(basicAttr, { sameSite: 'None', secure: true }));
     res.cookie(nonceKey, nonce, Object.assign(basicAttr, { sameSite: 'None', secure: true }));
 
+    // create legacy cookie
+    res.cookie(stateKey + '_compat', state, basicAttr);
+    res.cookie(nonceKey + '_compat', nonce, basicAttr);
+    
     const redirectTo = sessionManager.createAuthorizeUrl({
       redirectUri: urlHelpers.getBaseUrl(req) + urlPrefix + '/login/callback',
       scopes: options.scopes,
@@ -106,10 +110,10 @@ module.exports = function(options) {
       return next(new tools.ValidationError('Login failed. Invalid token.'));
     }
 
-    if (!req.cookies || (!req.cookies[nonceKey] && !req.cookies[nonceKey + '_compat']) || (req.cookies[nonceKey] !== decoded.nonce && req.cookies[nonceKey + "_compat"] !== decoded.nonce)) {
+    if ((req.cookies && req.cookies[nonceKey] && req.cookies[nonceKey] !== decoded.nonce) || (req.cookies && req.cookies[nonceKey + '_compat'] && req.cookies[nonceKey + '_compat'] !== decoded.nonce)) {
       return next(new tools.ValidationError('Login failed. Nonce mismatch.'));
-    } 
-    if (!req.cookies || (!req.cookies[stateKey] && !req.cookies[stateKey + "_compat"]) || (req.cookies[stateKey] !== req.body.state && req.cookies[stateKey + "_compat"] !== req.body.state)) {
+    }
+    if ((req.cookies && req.cookies[stateKey] && req.cookies[stateKey] !== req.body.state) || (req.cookies && req.cookies[stateKey + '_compat'] && req.cookies[stateKey + '_compat'] !== req.body.state)) {
       return next(new tools.ValidationError('Login failed. State mismatch.'));
     }
 
@@ -145,6 +149,8 @@ module.exports = function(options) {
     const encodedBaseUrl = encodeURIComponent(urlHelpers.getBaseUrl(req));
     res.clearCookie(stateKey, { path: basePath });
     res.clearCookie(nonceKey, { path: basePath });
+    res.clearCookie(stateKey + '_compat', { path: basePath });
+    res.clearCookie(nonceKey + '_compat', { path: basePath });
     res.header('Content-Type', 'text/html');
     res.status(200).send(
       '<html>' +

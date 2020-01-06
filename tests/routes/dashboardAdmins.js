@@ -188,8 +188,8 @@ tape('dashboardAdmins should redirect to auth0 on /login', function(t) {
         '&scope=openid%20name%20email' +
         '&expiration=36000' +
         '&redirect_uri=https%3A%2Flogin%2Flogin%2Fcallback&audience=https%3A%2F%2Ftest.auth0.com%2Fapi%2Fv2%2F' +
-        '&nonce=' + cookies.nonce +
-        '&state=' + cookies.state;
+        '&nonce=' + (cookies.nonce || cookies['nonce_compat']) +
+        '&state=' + (cookies.state || cookies['state_compat']);
       t.ok(url);
       t.equal(url, expectedUrl);
       t.end();
@@ -257,7 +257,7 @@ tape('dashboardAdmins should return ValidationError in case of legacy nonce mism
     aud: 'https://test.auth0.com/api/v2/',
     name: 'John Doe',
     admin: true,
-    nonce: 'nonce'
+    nonce_compat: 'nonce'
   });
 
   const req = {
@@ -343,6 +343,7 @@ tape('dashboardAdmins should return ValidationError in case of legacy state mism
     aud: 'https://test.auth0.com/api/v2/',
     name: 'John Doe',
     admin: true,
+    state_compat: 'state',
     nonce: 'nonce'
   });
 
