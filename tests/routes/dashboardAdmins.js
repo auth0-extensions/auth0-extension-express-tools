@@ -177,7 +177,15 @@ tape('dashboardAdmins should redirect to auth0 on /login', function(t) {
   const res = {
     cookie: function(key, value, options) {
       cookies[key] = value;
+      t.equal(options.httpOnly, true);
       t.equal(options.path, '/login/');
+      if (!key.includes('_compat')) {
+        t.equal(options.sameSite, 'None');
+        t.equal(options.secure, true);
+      } else {
+        t.false(options.sameSite);
+        t.false(options.secure);
+      }
     },
     redirect: function(url) {
       const expectedUrl =
@@ -188,8 +196,8 @@ tape('dashboardAdmins should redirect to auth0 on /login', function(t) {
         '&scope=openid%20name%20email' +
         '&expiration=36000' +
         '&redirect_uri=https%3A%2Flogin%2Flogin%2Fcallback&audience=https%3A%2F%2Ftest.auth0.com%2Fapi%2Fv2%2F' +
-        '&nonce=' + cookies.nonce +
-        '&state=' + cookies.state;
+        '&nonce=' + (cookies.nonce || cookies['nonce_compat']) +
+        '&state=' + (cookies.state || cookies['state_compat']);
       t.ok(url);
       t.equal(url, expectedUrl);
       t.end();
@@ -222,6 +230,49 @@ tape('dashboardAdmins should return ValidationError in case of nonce mismatch', 
     cookies: {
       state: 'state',
       nonce: 'another_nonce'
+    },
+    body: {
+      state: 'state',
+      id_token: token,
+      access_token: token
+    },
+    url: 'http://api/login/callback',
+    method: 'post'
+  };
+
+  const next = function(err) {
+    t.ok(err);
+    t.equal(err.name, 'ValidationError');
+    t.end();
+  };
+
+  mw(req, {}, next);
+});
+
+tape('dashboardAdmins should return ValidationError in case of legacy nonce mismatch', function(t) {
+  const mw = dashboardAdmins({
+    secret: 'abc',
+    audience: 'urn:api',
+    rta: 'test.auth0.com',
+    domain: 'test.auth0.com',
+    baseUrl: 'https://test.auth0.com/api/v2/',
+    clientName: 'Some Client'
+  });
+
+  const token = tokens.sign(certs.bar.private, 'key2', {
+    iss: 'https://test.auth0.com/',
+    sub: '1234567890',
+    aud: 'https://test.auth0.com/api/v2/',
+    name: 'John Doe',
+    admin: true,
+    nonce_compat: 'nonce'
+  });
+
+  const req = {
+    headers: {},
+    cookies: {
+      state: 'state',
+      nonce_compat: 'another_nonce'
     },
     body: {
       state: 'state',
@@ -284,6 +335,50 @@ tape('dashboardAdmins should return ValidationError in case of state mismatch', 
   mw(req, {}, next);
 });
 
+tape('dashboardAdmins should return ValidationError in case of legacy state mismatch', function(t) {
+  const mw = dashboardAdmins({
+    secret: 'abc',
+    audience: 'urn:api',
+    rta: 'test.auth0.com',
+    domain: 'test.auth0.com',
+    baseUrl: 'https://test.auth0.com/api/v2/',
+    clientName: 'Some Client'
+  });
+
+  const token = tokens.sign(certs.bar.private, 'key2', {
+    iss: 'https://test.auth0.com/',
+    sub: '1234567890',
+    aud: 'https://test.auth0.com/api/v2/',
+    name: 'John Doe',
+    admin: true,
+    state_compat: 'state',
+    nonce: 'nonce'
+  });
+
+  const req = {
+    headers: {},
+    cookies: {
+      state_compat: 'another_state',
+      nonce: 'nonce'
+    },
+    body: {
+      state: 'state',
+      id_token: token,
+      access_token: token
+    },
+    url: 'http://api/login/callback',
+    method: 'post'
+  };
+
+  const next = function(err) {
+    t.ok(err);
+    t.equal(err.name, 'ValidationError');
+    t.end();
+  };
+
+  mw(req, {}, next);
+});
+
 tape('dashboardAdmins should return 200 if everything is ok', function(t) {
   const mw = dashboardAdmins({
     secret: 'abc',
@@ -324,7 +419,67 @@ tape('dashboardAdmins should return 200 if everything is ok', function(t) {
     header: function() {},
     clearCookie: function(name) {
       if (name === 'nonce') t.equal(name, 'nonce');
-      else t.equal(name, 'state');
+      else if (name === 'nonce_compat') t.equal(name, 'nonce_compat');
+      else if (name === 'state') t.equal(name, 'state');
+      else t.equal(name, 'state_compat');
+    },
+    status: function(status) {
+      return {
+        send: function(html) {
+          t.ok(html);
+          t.equal(status, 200);
+          t.end();
+        }
+      };
+    }
+  };
+
+  mw(req, res);
+});
+
+tape('dashboardAdmins should return 200 with legacy nonce and state', function(t) {
+  const mw = dashboardAdmins({
+    secret: 'abc',
+    audience: 'urn:api',
+    rta: 'test.auth0.com',
+    domain: 'test.auth0.com',
+    baseUrl: 'https://test.auth0.com/api/v2/',
+    clientName: 'Some Client'
+  });
+
+  tokens.wellKnownEndpoint('test.auth0.com', certs.bar.cert, 'key2');
+  const token = tokens.sign(certs.bar.private, 'key2', {
+    iss: 'https://test.auth0.com/',
+    sub: '1234567890',
+    aud: 'https://test.auth0.com/api/v2/',
+    azp: 'https://test.auth0.com/api/v2/',
+    name: 'John Doe',
+    admin: true,
+    nonce: 'nonce'
+  });
+
+  const req = {
+    headers: {},
+    cookies: {
+      state_compat: 'state',
+      nonce_compat: 'nonce'
+    },
+    body: {
+      state: 'state',
+      id_token: token,
+      access_token: token
+    },
+    url: 'http://api/login/callback',
+    method: 'post'
+  };
+
+  const res = {
+    header: function() {},
+    clearCookie: function(name) {
+      if (name === 'nonce') t.equal(name, 'nonce');
+      else if (name === 'nonce_compat') t.equal(name, 'nonce_compat');
+      else if (name === 'state') t.equal(name, 'state');
+      else t.equal(name, 'state_compat');
     },
     status: function(status) {
       return {
@@ -381,7 +536,9 @@ tape('dashboardAdmins should work with localStorage', function(t) {
     header: function() {},
     clearCookie: function(name) {
       if (name === 'nonce') t.equal(name, 'nonce');
-      else t.equal(name, 'state');
+      else if (name === 'nonce_compat') t.equal(name, 'nonce_compat');
+      else if (name === 'state') t.equal(name, 'state');
+      else t.equal(name, 'state_compat');
     },
     status: function(status) {
       return {
