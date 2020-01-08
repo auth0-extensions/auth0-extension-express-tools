@@ -177,7 +177,15 @@ tape('dashboardAdmins should redirect to auth0 on /login', function(t) {
   const res = {
     cookie: function(key, value, options) {
       cookies[key] = value;
+      t.equal(options.httpOnly, true);
       t.equal(options.path, '/login/');
+      if (!key.includes('_compat')) {
+        t.equal(options.sameSite, 'None');
+        t.equal(options.secure, true);
+      } else {
+        t.false(options.sameSite);
+        t.false(options.secure);
+      }
     },
     redirect: function(url) {
       const expectedUrl =
@@ -411,7 +419,9 @@ tape('dashboardAdmins should return 200 if everything is ok', function(t) {
     header: function() {},
     clearCookie: function(name) {
       if (name === 'nonce') t.equal(name, 'nonce');
-      else t.equal(name, 'state');
+      else if (name === 'nonce_compat') t.equal(name, 'nonce_compat');
+      else if (name === 'state') t.equal(name, 'state');
+      else t.equal(name, 'state_compat');
     },
     status: function(status) {
       return {
@@ -467,7 +477,9 @@ tape('dashboardAdmins should return 200 with legacy nonce and state', function(t
     header: function() {},
     clearCookie: function(name) {
       if (name === 'nonce') t.equal(name, 'nonce');
-      else t.equal(name, 'state');
+      else if (name === 'nonce_compat') t.equal(name, 'nonce_compat');
+      else if (name === 'state') t.equal(name, 'state');
+      else t.equal(name, 'state_compat');
     },
     status: function(status) {
       return {
@@ -524,7 +536,9 @@ tape('dashboardAdmins should work with localStorage', function(t) {
     header: function() {},
     clearCookie: function(name) {
       if (name === 'nonce') t.equal(name, 'nonce');
-      else t.equal(name, 'state');
+      else if (name === 'nonce_compat') t.equal(name, 'nonce_compat');
+      else if (name === 'state') t.equal(name, 'state');
+      else t.equal(name, 'state_compat');
     },
     status: function(status) {
       return {
