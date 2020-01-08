@@ -80,8 +80,8 @@ module.exports = function(options) {
       path: basePath
     };
 
-    res.cookie(stateKey, state, Object.assign(basicAttr, { sameSite: 'None', secure: true }));
-    res.cookie(nonceKey, nonce, Object.assign(basicAttr, { sameSite: 'None', secure: true }));
+    res.cookie(stateKey, state, Object.assign({}, basicAttr, { sameSite: 'None', secure: true }));
+    res.cookie(nonceKey, nonce, Object.assign({}, basicAttr, { sameSite: 'None', secure: true }));
 
     // create legacy cookie
     res.cookie(stateKey + '_compat', state, basicAttr);
