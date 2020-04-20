@@ -6,7 +6,8 @@ module.exports = function(handlerOptions) {
     const isAdministrator = req.user && req.user.access_token && req.user.access_token.length;
     const options = !isAdministrator ? handlerOptions : {
       domain: handlerOptions.domain,
-      accessToken: req.user.access_token
+      accessToken: req.user.access_token,
+      headers: handlerOptions.headers
     };
 
     tools.managementApi.getClient(options)

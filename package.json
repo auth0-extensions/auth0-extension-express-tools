@@ -4,7 +4,7 @@
   "description": "A set of tools and utilities to simplify the development of Auth0 Extensions with Express.",
   "main": "src/index.js",
   "dependencies": {
-    "auth0-extension-tools": "^1.4.5",
+    "auth0-extension-tools": "^1.5.0",
     "cookie-parser": "^1.4.3",
     "express": "^4.17.1",
     "express-conditional-middleware": "2.0.0",
