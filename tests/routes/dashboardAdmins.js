@@ -397,7 +397,8 @@ tape('dashboardAdmins should return 200 if everything is ok', function(t) {
     azp: 'https://test.auth0.com/api/v2/',
     name: 'John Doe',
     admin: true,
-    nonce: 'nonce'
+    nonce: 'nonce',
+    exp: new Date().getTime()
   });
 
   const req = {
@@ -455,7 +456,8 @@ tape('dashboardAdmins should return 200 with legacy nonce and state', function(t
     azp: 'https://test.auth0.com/api/v2/',
     name: 'John Doe',
     admin: true,
-    nonce: 'nonce'
+    nonce: 'nonce',
+    exp: new Date().getTime()
   });
 
   const req = {
@@ -514,7 +516,8 @@ tape('dashboardAdmins should work with localStorage', function(t) {
     azp: 'https://test.auth0.com/api/v2/',
     name: 'John Doe',
     admin: true,
-    nonce: 'nonce'
+    nonce: 'nonce',
+    exp: new Date().getTime()
   });
 
   const req = {
