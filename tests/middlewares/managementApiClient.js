@@ -38,3 +38,23 @@ tape('managementApiClient errors should bubble up in the middleware', function(t
     t.end();
   });
 });
+
+tape('managementApiClient should attach client to the request with headers', function(t) {
+  const options = {
+    domain: 'me.auth0.com',
+    accessToken: 'ey',
+    headers: { customHeader: 'custom' }
+  };
+
+  const mw = managementApiClientMiddleware(options);
+  t.ok(mw);
+
+  const req = { };
+  mw(req, { }, function() {
+    t.ok(req);
+    t.ok(req.auth0);
+    const keys = Object.keys(req.auth0);
+    keys.forEach(key => req.auth0[key].resource && t.equal(req.auth0[key].resource.restClient.options.headers.customHeader, 'custom'));
+    t.end();
+  });
+});
