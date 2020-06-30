@@ -317,10 +317,10 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha1-x57Zf380y48robyXkLzDZkdLS3k=
 
-auth0-extension-tools@^1.4.5:
-  version "1.4.5"
-  resolved "https://registry.yarnpkg.com/auth0-extension-tools/-/auth0-extension-tools-1.4.5.tgz#a2c030d912fdae45f08083fd3062286bff5c8ded"
-  integrity sha512-5sa8AKMCm2mTnpkccofmjLkOix17TuewYDNMAzhj6b9QCwmNTqXQk20hlHFe9FVgyZ+w8vre7zDz7O3sv7GTkg==
+auth0-extension-tools@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/auth0-extension-tools/-/auth0-extension-tools-1.5.0.tgz#9229c5b4e8994f872c4cf1a9d628df9b08f794f2"
+  integrity sha512-UxQWMI/W1P5xhPUjDnbibyUyjoKYRmZCqIPFZs7tMFKNIugBfRV72tk0mX3fEkvbqjujwvpsS5a1a7jUqAZmFQ==
   dependencies:
     async "2.1.2"
     auth0 "^2.23.0"
@@ -1396,14 +1396,14 @@ express-conditional-middleware@2.0.0:
   dependencies:
     once "1.4.0"
 
-express-jwt@^3.1.0:
-  version "3.4.0"
-  resolved "https://registry.yarnpkg.com/express-jwt/-/express-jwt-3.4.0.tgz#e6fe8730e61da81a8deab64680154ae46c0028cc"
-  integrity sha1-5v6HMOYdqBqN6rZGgBVK5GwAKMw=
+express-jwt@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/express-jwt/-/express-jwt-6.0.0.tgz#20886c730983ffb1c706a4383235df86eff349b8"
+  integrity sha512-C26y9myRjx7CyhZ+BAT3p+gQyRCoDZ7qo8plCvLDaRT6je6ALIAQknT6XLVQGFKwIy/Ux7lvM2MNap5dt0T7gA==
   dependencies:
     async "^1.5.0"
     express-unless "^0.3.0"
-    jsonwebtoken "^5.0.0"
+    jsonwebtoken "^8.1.0"
     lodash.set "^4.0.0"
 
 express-unless@^0.3.0:
@@ -2313,7 +2313,7 @@ jsonpointer@^4.0.0:
   resolved "https://registry.yarnpkg.com/jsonpointer/-/jsonpointer-4.0.1.tgz#4fd92cb34e0e9db3c89c8622ecf51f9b978c6cb9"
   integrity sha1-T9kss04OnbPInIYi7PUfm5eMbLk=
 
-jsonwebtoken@^5.0.0, jsonwebtoken@^5.7.0:
+jsonwebtoken@^5.7.0:
   version "5.7.0"
   resolved "https://registry.yarnpkg.com/jsonwebtoken/-/jsonwebtoken-5.7.0.tgz#1c90f9a86ce5b748f5f979c12b70402b4afcddb4"
   integrity sha1-HJD5qGzlt0j1+XnBK3BAK0r83bQ=
@@ -2333,7 +2333,7 @@ jsonwebtoken@^7.1.9:
     ms "^2.0.0"
     xtend "^4.0.1"
 
-jsonwebtoken@^8.3.0, jsonwebtoken@^8.5.1:
+jsonwebtoken@^8.1.0, jsonwebtoken@^8.3.0, jsonwebtoken@^8.5.1:
   version "8.5.1"
   resolved "https://registry.yarnpkg.com/jsonwebtoken/-/jsonwebtoken-8.5.1.tgz#00e71e0b8df54c2121a1f26137df2280673bcc0d"
   integrity sha512-XjwVfRS6jTMsqYs0EsuJ4LGxXV14zQybNd4L2r0UvbVnSF9Af8x7p5MzbJ90Ioz/9TI41/hTCvznF/loiSzn8w==
