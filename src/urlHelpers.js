@@ -7,7 +7,12 @@ const SANITIZE_RX = /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g; // eslint-disable-lin
 
 const getBasePath = function(originalUrl, path) {
   var basePath = url.parse(originalUrl).pathname || '';
-  basePath = basePath.replace(new RegExp(escapeRegex(path) + '$'), '')
+  var sanitizedPath = ''
+  if (path) {
+    sanitizedPath = path.replace(SANITIZE_RX, '\\$&')
+  }
+
+  basePath = basePath.replace(new RegExp(sanitizedPath + '$'), '')
     .replace(/^\/|\/$/g, '');
   if (!basePath.startsWith('/')) {
     basePath = '/' + basePath;
@@ -29,10 +34,16 @@ module.exports.getBaseUrl = function(req, protocol) {
   }
 
   const originalUrl = url.parse(req.originalUrl || '').pathname || '';
+
+  var sanitizedPath = ''
+  if (req.path) {
+    sanitizedPath = req.path.replace(SANITIZE_RX, '\\$&')
+  }
+
   return url.format({
     protocol: urlProtocol || 'https',
     host: req.headers.host,
-    pathname: originalUrl.replace(new RegExp(escapeRegex(req.path) + '$'), '').replace(/\/$/g, '')
+    pathname: originalUrl.replace(new RegExp(sanitizedPath + '$'), '').replace(/\/$/g, '')
   });
 };
 
@@ -97,7 +108,3 @@ module.exports.getWebtaskUrl = function(req) {
 
   return webtaskUrl;
 };
-
-function escapeRegex(string) {
-  return string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-}
