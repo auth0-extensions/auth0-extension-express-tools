@@ -7,7 +7,7 @@ const SANITIZE_RX = /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g; // eslint-disable-lin
 
 const getBasePath = function(originalUrl, path) {
   var basePath = url.parse(originalUrl).pathname || '';
-  basePath = basePath.replace(path, '')
+  basePath = basePath.replace(new RegExp(path + '$'), '')
     .replace(/^\/|\/$/g, '');
   if (!basePath.startsWith('/')) {
     basePath = '/' + basePath;
@@ -32,7 +32,7 @@ module.exports.getBaseUrl = function(req, protocol) {
   return url.format({
     protocol: urlProtocol || 'https',
     host: req.headers.host,
-    pathname: originalUrl.replace(req.path, '').replace(/\/$/g, '')
+    pathname: originalUrl.replace(new RegExp(req.path + '$'), '').replace(/\/$/g, '')
   });
 };
 
