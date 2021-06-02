@@ -13,6 +13,7 @@ const getBasePath = function(originalUrl, path) {
   }
 
   basePath = basePath.replace(new RegExp(sanitizedPath + '$'), '')
+    // Strip leading and trailing slashes
     .replace(/^\/|\/$/g, '');
   if (!basePath.startsWith('/')) {
     basePath = '/' + basePath;
