@@ -15,6 +15,19 @@ tape('urlHelpers#getBasePath should return the base path of the request', functi
   t.end();
 });
 
+tape('urlHelpers#getBasePath should not overwrite tenant name with path', function(t) {
+  const req = {
+    originalUrl: 'https://sandbox.it.auth0.com/api/run/logintest/abc',
+    path: '/login',
+    headers: {
+      host: 'sandbox.it.auth0.com'
+    }
+  };
+
+  t.equal(urlHelpers.getBasePath(req), '/api/run/logintest/abc/');
+  t.end();
+});
+
 tape('urlHelpers#getBasePath should return slash if not running in webtask', function(t) {
   const req = {
     path: '/users',
@@ -74,10 +87,10 @@ tape('urlHelpers#getBaseUrl should use https by default', function(t) {
   t.end();
 });
 
-tape('urlHelpers#getBaseUrl should allow overwriting the protocol', function(t) {
+tape('urlHelpers#getBaseUrl should not overwrite tenant name with path', function(t) {
   const req = {
-    originalUrl: 'https://sandbox.it.auth0.com/api/run/mytenant/abc',
-    path: '/users',
+    originalUrl: 'https://sandbox.it.auth0.com/api/run/logintest/abc',
+    path: '/login',
     headers: {
       host: 'sandbox.it.auth0.com'
     },
@@ -86,6 +99,6 @@ tape('urlHelpers#getBaseUrl should allow overwriting the protocol', function(t) 
     }
   };
 
-  t.equal(urlHelpers.getBaseUrl(req, 'http'), 'http://sandbox.it.auth0.com/api/run/mytenant/abc');
+  t.equal(urlHelpers.getBaseUrl(req, 'http'), 'http://sandbox.it.auth0.com/api/run/logintest/abc');
   t.end();
 });

@@ -7,7 +7,13 @@ const SANITIZE_RX = /[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g; // eslint-disable-lin
 
 const getBasePath = function(originalUrl, path) {
   var basePath = url.parse(originalUrl).pathname || '';
-  basePath = basePath.replace(path, '')
+  var sanitizedPath = ''
+  if (path) {
+    sanitizedPath = path.replace(SANITIZE_RX, '\\$&')
+  }
+
+  basePath = basePath.replace(new RegExp(sanitizedPath + '$'), '')
+    // Strip leading and trailing slashes
     .replace(/^\/|\/$/g, '');
   if (!basePath.startsWith('/')) {
     basePath = '/' + basePath;
@@ -29,10 +35,16 @@ module.exports.getBaseUrl = function(req, protocol) {
   }
 
   const originalUrl = url.parse(req.originalUrl || '').pathname || '';
+
+  var sanitizedPath = ''
+  if (req.path) {
+    sanitizedPath = req.path.replace(SANITIZE_RX, '\\$&')
+  }
+
   return url.format({
     protocol: urlProtocol || 'https',
     host: req.headers.host,
-    pathname: originalUrl.replace(req.path, '').replace(/\/$/g, '')
+    pathname: originalUrl.replace(new RegExp(sanitizedPath + '$'), '').replace(/\/$/g, '')
   });
 };
 
