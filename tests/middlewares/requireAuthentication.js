@@ -1,26 +1,28 @@
-const tape = require('tape');
+const { expect } = require('chai');
 
 const requireAuthentication = require('../../src/middlewares').requireAuthentication;
 
-tape('requireUser should continue if user is set', function(t) {
-  requireAuthentication(
-    { user: { name: 'foo' } },
-    { },
-    function(err) {
-      t.notOk(err);
-      t.end();
-    }
-  );
-});
+describe('requireAuthentication', function() {
+  it('should continue if user is set', function(done) {
+    requireAuthentication(
+      { user: { name: 'foo' } },
+      { },
+      function(err) {
+        expect(err).to.not.exist;
+        done();
+      }
+    );
+  });
 
-tape('requireUser should return error if user is not set', function(t) {
-  requireAuthentication(
-    { },
-    { },
-    function(err) {
-      t.ok(err);
-      t.equal(err.name, 'UnauthorizedError');
-      t.end();
-    }
-  );
+  it('should return error if user is not set', function(done) {
+    requireAuthentication(
+      { },
+      { },
+      function(err) {
+        expect(err).to.exist;
+        expect(err.name).to.equal('UnauthorizedError');
+        done();
+      }
+    );
+  });
 });

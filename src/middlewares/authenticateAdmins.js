@@ -1,5 +1,5 @@
-const decode = require('jwt-decode');
-const expressJwt = require('express-jwt');
+const { jwtDecode } = require('jwt-decode');
+const { expressjwt } = require('express-jwt');
 const tools = require('auth0-extension-tools');
 const conditional = require('express-conditional-middleware');
 
@@ -32,7 +32,7 @@ module.exports = function(options) {
     throw new tools.ArgumentError('The provided base URL is invalid: ' + options.baseUrl);
   }
 
-  const validateToken = expressJwt({
+  const validateToken = expressjwt({
     audience: options.audience,
     issuer: options.baseUrl,
     secret: options.secret,
@@ -45,7 +45,6 @@ module.exports = function(options) {
       if (err) {
         return next(err);
       }
-
       if (options.onLoginSuccess) {
         return options.onLoginSuccess(req, res, next);
       }
@@ -61,7 +60,7 @@ module.exports.optional = function(options) {
     function(req) {
       if (req && req.headers && req.headers.authorization && req.headers.authorization.indexOf('Bearer ') === 0) {
         try {
-          const decodedToken = decode(req.headers.authorization.split(' ')[1]);
+          const decodedToken = jwtDecode(req.headers.authorization.split(' ')[1]);
           return decodedToken && decodedToken.iss === options.baseUrl;
         } catch (ex) {
           return false;
