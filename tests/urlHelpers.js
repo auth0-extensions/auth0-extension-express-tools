@@ -1,104 +1,103 @@
-const tape = require('tape');
+const { expect } = require('chai');
 
 const urlHelpers = require('../src/urlHelpers');
 
-tape('urlHelpers#getBasePath should return the base path of the request', function(t) {
-  const req = {
-    originalUrl: 'https://sandbox.it.auth0.com/api/run/mytenant/abc',
-    path: '/users',
-    headers: {
-      host: 'sandbox.it.auth0.com'
-    }
-  };
+describe('urlHelpers', function() {
+  describe('#getBasePath', function() {
+    it('should return the base path of the request', function() {
+      const req = {
+        originalUrl: 'https://sandbox.it.auth0.com/api/run/mytenant/abc',
+        path: '/users',
+        headers: {
+          host: 'sandbox.it.auth0.com'
+        }
+      };
 
-  t.equal(urlHelpers.getBasePath(req), '/api/run/mytenant/abc/');
-  t.end();
-});
+      expect(urlHelpers.getBasePath(req)).to.equal('/api/run/mytenant/abc/');
+    });
 
-tape('urlHelpers#getBasePath should not overwrite tenant name with path', function(t) {
-  const req = {
-    originalUrl: 'https://sandbox.it.auth0.com/api/run/logintest/abc',
-    path: '/login',
-    headers: {
-      host: 'sandbox.it.auth0.com'
-    }
-  };
+    it('should not overwrite tenant name with path', function() {
+      const req = {
+        originalUrl: 'https://sandbox.it.auth0.com/api/run/logintest/abc',
+        path: '/login',
+        headers: {
+          host: 'sandbox.it.auth0.com'
+        }
+      };
 
-  t.equal(urlHelpers.getBasePath(req), '/api/run/logintest/abc/');
-  t.end();
-});
+      expect(urlHelpers.getBasePath(req)).to.equal('/api/run/logintest/abc/');
+    });
 
-tape('urlHelpers#getBasePath should return slash if not running in webtask', function(t) {
-  const req = {
-    path: '/users',
-    headers: {
-      host: 'sandbox.it.auth0.com'
-    }
-  };
+    it('should return slash if not running in webtask', function() {
+      const req = {
+        path: '/users',
+        headers: {
+          host: 'sandbox.it.auth0.com'
+        }
+      };
 
-  t.equal(urlHelpers.getBasePath(req), '/');
-  t.end();
-});
+      expect(urlHelpers.getBasePath(req)).to.equal('/');
+    });
+  });
 
-tape('urlHelpers#getBaseUrl should return the base path of the request', function(t) {
-  const req = {
-    originalUrl: 'https://sandbox.it.auth0.com/api/run/mytenant/abc',
-    path: '/users',
-    headers: {
-      host: 'sandbox.it.auth0.com'
-    },
-    get: function() {
-      return 'sandbox.it.auth0.com';
-    }
-  };
+  describe('#getBaseUrl', function() {
+    it('should return the base path of the request', function() {
+      const req = {
+        originalUrl: 'https://sandbox.it.auth0.com/api/run/mytenant/abc',
+        path: '/users',
+        headers: {
+          host: 'sandbox.it.auth0.com'
+        },
+        get: function() {
+          return 'sandbox.it.auth0.com';
+        }
+      };
 
-  t.equal(urlHelpers.getBaseUrl(req), 'https://sandbox.it.auth0.com/api/run/mytenant/abc');
-  t.end();
-});
+      expect(urlHelpers.getBaseUrl(req)).to.equal('https://sandbox.it.auth0.com/api/run/mytenant/abc');
+    });
 
-tape('urlHelpers#getBaseUrl should return slash if not running in webtask', function(t) {
-  const req = {
-    path: '/users',
-    headers: {
-      host: 'sandbox.it.auth0.com'
-    },
-    get: function() {
-      return 'sandbox.it.auth0.com';
-    }
-  };
+    it('should return slash if not running in webtask', function() {
+      const req = {
+        path: '/users',
+        headers: {
+          host: 'sandbox.it.auth0.com'
+        },
+        get: function() {
+          return 'sandbox.it.auth0.com';
+        }
+      };
 
-  t.equal(urlHelpers.getBaseUrl(req), 'https://sandbox.it.auth0.com');
-  t.end();
-});
+      expect(urlHelpers.getBaseUrl(req)).to.equal('https://sandbox.it.auth0.com');
+    });
 
-tape('urlHelpers#getBaseUrl should use https by default', function(t) {
-  const req = {
-    originalUrl: 'http://sandbox.it.auth0.com/api/run/mytenant/abc',
-    path: '/users',
-    headers: {
-      host: 'sandbox.it.auth0.com'
-    },
-    get: function() {
-      return 'sandbox.it.auth0.com';
-    }
-  };
+    it('should use https by default', function() {
+      const req = {
+        originalUrl: 'http://sandbox.it.auth0.com/api/run/mytenant/abc',
+        path: '/users',
+        headers: {
+          host: 'sandbox.it.auth0.com'
+        },
+        get: function() {
+          return 'sandbox.it.auth0.com';
+        }
+      };
 
-  t.equal(urlHelpers.getBaseUrl(req), 'https://sandbox.it.auth0.com/api/run/mytenant/abc');
-  t.end();
-});
+      expect(urlHelpers.getBaseUrl(req)).to.equal('https://sandbox.it.auth0.com/api/run/mytenant/abc');
+    });
 
-tape('urlHelpers#getBaseUrl should not overwrite tenant name with path', function(t) {
-  const req = {
-    originalUrl: 'https://sandbox.it.auth0.com/api/run/logintest/abc',
-    path: '/login',
-    headers: {
-      host: 'sandbox.it.auth0.com'
-    },
-    get: function() {
-      return 'sandbox.it.auth0.com';
-    }
-  };
+    it('should not overwrite tenant name with path', function() {
+      const req = {
+        originalUrl: 'https://sandbox.it.auth0.com/api/run/logintest/abc',
+        path: '/login',
+        headers: {
+          host: 'sandbox.it.auth0.com'
+        },
+        get: function() {
+          return 'sandbox.it.auth0.com';
+        }
+      };
 
-  t.equal(urlHelpers.getBaseUrl(req, 'http'), 'http://sandbox.it.auth0.com/api/run/logintest/abc');
-  t.end();
+      expect(urlHelpers.getBaseUrl(req, 'http')).to.equal('http://sandbox.it.auth0.com/api/run/logintest/abc');
+    });
+  });
 });

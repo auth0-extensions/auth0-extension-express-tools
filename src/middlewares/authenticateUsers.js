@@ -1,5 +1,5 @@
-const decode = require('jwt-decode');
-const jwt = require('express-jwt');
+const { jwtDecode } = require('jwt-decode');
+const { expressjwt } = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const tools = require('auth0-extension-tools');
 const conditional = require('express-conditional-middleware');
@@ -26,7 +26,7 @@ module.exports = function(options) {
     throw new tools.ArgumentError('The provided audience is invalid: ' + options.audience);
   }
 
-  const validateToken = jwt({
+  const validateToken = expressjwt({
     secret: jwksRsa.expressJwtSecret({
       cache: true,
       rateLimit: true,
@@ -71,7 +71,7 @@ module.exports.optional = function(options) {
     function(req) {
       if (req && req.headers && req.headers.authorization && req.headers.authorization.indexOf('Bearer ') === 0) {
         try {
-          const decodedToken = decode(req.headers.authorization.split(' ')[1]);
+          const decodedToken = jwtDecode(req.headers.authorization.split(' ')[1]);
           return decodedToken && decodedToken.iss === 'https://' + options.domain + '/';
         } catch (ex) {
           return false;
